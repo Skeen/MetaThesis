@@ -7,5 +7,6 @@ fi
 # Clone all repositories recursively
 git clone --recursive git@github.com:Skeen/MetaThesis.git
 # Checkout branches
-git submodule foreach -q --recursive \
-  'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)'
+cd MetaThesis && \
+    git submodule foreach -q --recursive \
+    'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)'
