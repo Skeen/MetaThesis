@@ -1,4 +1,4 @@
-# Meta Library for Javascript Spy Thesis
+# Meta Repository for Javascript Spy Thesis
 
 Clone by running `clone.sh`:
 ```
