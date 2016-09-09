@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SCRIPT_PATH=$(readlink -e $0)
+
 if [ -z "$SSH_AUTH_SOCK" ] ; then
   eval `ssh-agent -s`
   ssh-add
@@ -11,4 +13,4 @@ cd MetaThesis && \
     git submodule foreach -q --recursive \
     'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)'
 # Self-destruct
-rm -- "$0"
+rm -- "$SCRIPT_PATH"
