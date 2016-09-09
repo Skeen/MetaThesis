@@ -1,7 +1,7 @@
 [submodule "code"]
 	path = code
     url = git@github.com:Skeen/Thesis_Aslan_Code.git
-    branch = master
+	branch = master
 [submodule "report"]
 	path = report
     url = git@github.com:RasmusMJ/report.git
