@@ -10,3 +10,5 @@ git clone --recursive git@github.com:Skeen/MetaThesis.git
 cd MetaThesis && \
     git submodule foreach -q --recursive \
     'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)'
+# Self-destruct
+rm -- "$0"
