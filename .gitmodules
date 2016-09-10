@@ -6,3 +6,7 @@
     path = report
     url = git@github.com:RasmusMJ/report.git
     branch = master
+[submodule "project"]
+	path = project
+	url = git@github.com:RasmusMJ/project.git
+	branch = master
