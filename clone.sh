@@ -3,6 +3,7 @@
 # Get the absolute path to this script
 SCRIPT_PATH=$(readlink -e $0)
 
+# Setup SSH agents
 if [ -z "$SSH_AUTH_SOCK" ] ; then
     # Start up the ssh-agent
     OUTPUT=$(ssh-agent -s)
@@ -16,11 +17,19 @@ if [ -z "$SSH_AUTH_SOCK" ] ; then
 fi
 # Clone all repositories recursively
 git clone --recursive git@github.com:Skeen/MetaThesis.git
-# Checkout branches
-cd MetaThesis && \
-    git submodule foreach -q --recursive \
-    'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)'
+# Setup all submodules recursively
+GIT_FOLDERS=$(find . -name ".git" | xargs dirname | xargs realpath)
+for repo in $GIT_FOLDERS; do
+    cd $repo && \
+        git submodule init &&
+        git submodule update
+
+    cd $repo && \
+        git submodule foreach -q --recursive \
+            'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)'
+done
+
 # Kill our spawned ssh-agent
 kill $PID
 # Self-destruct
-rm -- "$SCRIPT_PATH"
+#rm -- "$SCRIPT_PATH"
