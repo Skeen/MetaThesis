@@ -27,6 +27,7 @@ function clone {
 function pull {
     # Setup all submodules recursively
     GIT_FOLDERS=$(find . -name ".git" | xargs dirname | xargs realpath)
+    echo "Found repos: $GIT_FOLDERS"
     for repo in $GIT_FOLDERS; do
         cd $repo && \
             git submodule init &&
@@ -34,18 +35,25 @@ function pull {
 
         cd $repo && \
             git submodule foreach -q --recursive \
-                'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)'
+                'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master); git pull'
     done
 }
 
+function kill_ssh_agent {
+    kill $PID
+}
+
+trap kill_ssh_agent 2
+
 case $1 in
     pull)
+        ssh_agent
         pull
+        kill_ssh_agent
         ;;
     *)
         ssh_agent
         clone
         pull
-        # Kill our spawned ssh-agent
-        kill $PID
+        kill_ssh_agent
 esac
