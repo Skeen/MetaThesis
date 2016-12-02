@@ -1,7 +1,8 @@
 #!/bin/bash
+set -e
 
 # Get the absolute path to this script
-SCRIPT_PATH=$(readlink -e $0)
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function ssh_agent {
     # Setup SSH agents
@@ -20,22 +21,40 @@ function ssh_agent {
 
 # Clone all repositories recursively
 function clone {
-    git clone --recursive git@github.com:Skeen/MetaThesis.git
+    echo ""
+    echo "Cloning MetaThesis"
+    git clone git@github.com:Skeen/MetaThesis.git 1>/dev/null 2>/dev/null
 }
 
 # Pull in submodules and changes
 function pull {
-    # Setup all submodules recursively
-    GIT_FOLDERS=$(find . -name ".git" | xargs dirname | xargs realpath)
-    echo "Found repos: $GIT_FOLDERS"
-    for repo in $GIT_FOLDERS; do
-        cd $repo && \
-            git submodule init &&
-            git submodule update
+    echo ""
+    echo "Moving to $1"
+    cd $1
 
-        cd $repo && \
-            git submodule foreach -q --recursive \
-                'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master); git pull'
+    echo -e "\tChecking out"
+    git checkout $2 1>/dev/null 2>/dev/null
+    echo -e "\tPulling"
+    git pull 1>/dev/null 2>/dev/null
+    # Clone recursively
+    echo -e "\tInitializing submodules"
+    git submodule update --init 1>/dev/null 2>/dev/null
+
+    # Setup all submodules recursively
+    GIT_FOLDERS=$(find . -mindepth 2 -name ".git")
+    # Output them
+    echo "Found repos (inside $PWD):"
+    for REPO in $GIT_FOLDERS; do
+
+        REPO_REAL=$(dirname "$REPO" | xargs realpath)
+        echo -e "\t$REPO_REAL"
+    done
+    # Process them
+    for REPO in $GIT_FOLDERS; do
+
+        cd $1
+        REPO_REAL=$(dirname "$REPO" | xargs realpath)
+        pull "$REPO_REAL" "master"
     done
 }
 
@@ -54,6 +73,6 @@ case $1 in
     *)
         ssh_agent
         clone
-        pull
+        pull "$DIR/MetaThesis" "master"
         kill_ssh_agent
 esac
