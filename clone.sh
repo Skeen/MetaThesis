@@ -64,10 +64,33 @@ function kill_ssh_agent {
 
 trap kill_ssh_agent 2
 
+function pull_missing {
+    echo ""
+    echo "Working from $PWD"
+    WORKDIR=$PWD
+
+    echo -e "Uninitialized submodules:"
+    UNINIT_SUBMODULE=$(git submodule status | grep -v "(" | cut -f2 -d' ')
+    for REPO in $UNINIT_SUBMODULE; do
+
+        REPO_REAL=$(echo "$REPO" | xargs realpath)
+        echo -e "\t$REPO_REAL"
+    done
+    # Process them
+    for REPO in $UNINIT_SUBMODULE; do
+
+        cd $WORKDIR
+        REPO_REAL=$(echo "$REPO" | xargs realpath)
+        git submodule update --init $REPO_REAL
+        pull "$REPO_REAL" "master"
+    done
+}
+
+
 case $1 in
-    pull)
+    pull_missing)
         ssh_agent
-        pull
+        pull_missing
         kill_ssh_agent
         ;;
     *)
